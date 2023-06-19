@@ -16,12 +16,17 @@ using UnityEngine.SocialPlatforms.Impl;
 //역할 : Enemy가 처음 생성될 때, 이동방식을 랜덤하게 지정
 // 1. 아래로 이동 2. 타깃 이동 3. 랜덤 확률 50%
 
+//역할 : Enemy의 이동방식에 따라 점수 스코어 다르게 지정
+// 1. 어떤 이동 방식인지?
+// 2. 아래로 이동 : Score +1 / Player를 향해 이동 : Score +3
+
 public class Enemy : MonoBehaviour
 {
    
 
     GameObject player; //타깃(Player)
     Vector3 direction; //이동 방향
+    int moveState = -1; //이동 방식 0:Down, 1:player
 
     public float speed = 5f;
     public int enemyHp = 3;
@@ -36,11 +41,13 @@ public class Enemy : MonoBehaviour
         if (randomNumber >= 50)
         {
             direction = Vector3.down;
+            moveState = 0;
         }
         if (randomNumber < 50)
         {
             direction = player.transform.position - transform.position;
             direction.Normalize();
+            moveState = 1;
         }
     }
 
@@ -72,18 +79,34 @@ public class Enemy : MonoBehaviour
         if (collision.gameObject.name.Contains("Missile"))
         {
 
+            // A: 이동이 down 이면 +1
+            // B: 이동이 Player 이면 +3
+
             Destroy(collision.gameObject);
             enemyHp -= 1;
             Debug.Log("enemyHP:" + enemyHp);
             if (enemyHp <= 0)
             {
                 Destroy(gameObject);
+                
                 // 0-3. ScoreManager.cs 컴포넌트를 가지고 있는 GameObject를 찾는다.
                 GameObject smObj = GameObject.Find("Score Manager");
                 // 0-2. SetScore()를 가지고 있는 ScoreManager 컴포넌트를 찾는다.
                 ScoreManager sm = smObj.GetComponent<ScoreManager>();
-                // 0-1. SetScore 실행 // 0. 현재 점수 +1 증가
-                sm.SetScore();
+                if (moveState == 0)
+                {
+                    
+                    // 0-1. SetScore 실행 // 0. 현재 점수 +1 증가
+                    sm.SetScore(1);
+                }
+                if (moveState == 1)
+                {
+                    
+                    sm.SetScore(3);
+                }
+               
+                
+                
             }
         }
         if (collision.gameObject.name.Equals("Player"))
