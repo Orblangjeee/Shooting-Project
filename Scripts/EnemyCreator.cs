@@ -33,12 +33,16 @@ public class EnemyCreator : MonoBehaviour
    
         currentTime += Time.deltaTime; //3. 시간이 경과한다.
         if ( currentTime > createTime) //2. 경과시간이 일정시간 되었을 때
-        {
-            Instantiate(enemyFectory); //1. Enemy를 생성한다.
-            enemyFectory.transform.position = transform.position; //생성한 Enemy를 생성 위치에 옮겨놓는다.
+        {   
+            GameObject enemy = Instantiate(enemyFectory); //1. Enemy를 생성한다.
+            enemy.transform.position = transform.position; //생성한 Enemy를 생성 위치에 옮겨놓는다.
+                                                           //Enemy.cs 컴포넌트 알기
+            Enemy enemyComp = enemy.GetComponent<Enemy>();
+            enemyComp.SpeedUp();
+
             currentTime = 0f; //0. 경과 시간을 0으로 초기화
-
-
+     
+         
         }
 
     }
@@ -52,11 +56,15 @@ public class EnemyCreator : MonoBehaviour
         //1초 --> 변수로 만들어서 inspector창에서 관리
         if (createTime > stopdecrease)
         {
+            
             //4-3-1. 현재 creatime의 10%를 감소시키고
             float decresedTime = createTime * (1 - decreaseTimeRate);
             //float decreaseTime = createTime * 0.9f;
             //4-3-2. 감소시킨 시간을 creatime으로 갱신한다.
             createTime = decresedTime;
+            
+
+           
         }
 
        

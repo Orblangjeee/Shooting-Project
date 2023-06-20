@@ -20,6 +20,8 @@ using UnityEngine.SocialPlatforms.Impl;
 // 1. 어떤 이동 방식인지?
 // 2. 아래로 이동 : Score +1 / Player를 향해 이동 : Score +3
 
+
+//역할 : Enemy의 이동속도를 증가시킴
 public class Enemy : MonoBehaviour
 {
    
@@ -28,27 +30,43 @@ public class Enemy : MonoBehaviour
     Vector3 direction; //이동 방향
     int moveState = -1; //이동 방식 0:Down, 1:player
 
+    
     public float speed = 5f;
     public int enemyHp = 3;
+    public int minusHp = -1;
+
     // Start is called before the first frame update
     void Start()
     {
         player = GameObject.Find("Player"); //plyer 게임 오브젝트 찾기
-
-        //랜덤 : 100개의 숫자 중 1개 뽑기
-        int randomNumber = Random.Range(0, 100);
-        //뽑은 숫자 50보다 큰 경우 : 아래 이동 / 작은 경우 : 타겟 이동
-        if (randomNumber >= 50)
+        //문제 : player가 파괴되면 player를 향해 날아가는 enemy가 갈 곳을 잃음
+        //해결 : 만약 player를 찾았는데 없다면 숫자 뽑지 말고 down 방향으로 날아가게 만든다.
+        // 1. player 변수가 비어있다면 ?
+        // 2. direction 을 down 으로 해준다
+        
+        if (player == null)
         {
             direction = Vector3.down;
-            moveState = 0;
+
+            return; //코드 빠져나오기 != null
         }
-        if (randomNumber < 50)
-        {
-            direction = player.transform.position - transform.position;
-            direction.Normalize();
-            moveState = 1;
-        }
+        
+            //랜덤 : 100개의 숫자 중 1개 뽑기
+            int randomNumber = Random.Range(0, 100);
+            //뽑은 숫자 50보다 큰 경우 : 아래 이동 / 작은 경우 : 타겟 이동
+            if (randomNumber >= 50)
+            {
+                direction = Vector3.down;
+                moveState = 0;
+            }
+            if (randomNumber < 50)
+            {
+                direction = player.transform.position - transform.position;
+                direction.Normalize();
+                moveState = 1;
+            }
+        
+
     }
 
     // Update is called once per frame
@@ -95,13 +113,11 @@ public class Enemy : MonoBehaviour
                 ScoreManager sm = smObj.GetComponent<ScoreManager>();
                 if (moveState == 0)
                 {
-                    
                     // 0-1. SetScore 실행 // 0. 현재 점수 +1 증가
                     sm.SetScore(1);
                 }
                 if (moveState == 1)
                 {
-                    
                     sm.SetScore(3);
                 }
                
@@ -110,9 +126,31 @@ public class Enemy : MonoBehaviour
             }
         }
         if (collision.gameObject.name.Equals("Player"))
-        {            
-            //Destroy(collision.gameObject);
+        {
+            // 부딪힌 plyaer HP 감소
+            PlayerHealth playhp = player.GetComponent<PlayerHealth>();
+            playhp.SetHP(minusHp);
+
+            //
             Destroy(gameObject);   
         }
+    }
+
+    //Enemy 이동속도 증가
+    public void SpeedUp()
+    {
+       
+        GameObject lmObj = GameObject.Find("Level Manager");
+        LevelManager lm = lmObj.GetComponent<LevelManager>();
+        //현재 level이 뭐지? 가져와야행
+
+        //[방어코드] 현재 level:2 이상인 경우에만 스피드를 올린다.
+        // 현재 level:1 초과인 경우에만 스피드를 올린다.
+        if (lm.level > 1)
+        {
+            //Level이 증가한 만큼 speed를 올린다.
+            speed = speed + lm.level;
+        }
+        
     }
 }

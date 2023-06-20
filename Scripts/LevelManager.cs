@@ -9,7 +9,7 @@ using Unity.VisualScripting.Antlr3.Runtime.Tree;
 
 //역할2 : level에 따라서 enemycreator의 생성속도와 enemy 이동속도를 올린다.
 //enemycreator의 생성속도를 level에 따라 일정 비율로 변화
-
+//enemy 이동속도를 level에 따라 일정 비율로 변화
 
 public class LevelManager : MonoBehaviour
 {
@@ -29,24 +29,9 @@ public class LevelManager : MonoBehaviour
     {
         
     }
-
+    /*
     public void Levelup()
     {
-        level++;
-        levelText.text = "Lv."+ level;
-        levelUpScore = originUpScore * level;
-        //level이 증가한 만큼 levelupscore도 증가
-
-        //4. enemycreator의 생성속도를 level에 따라 감소시킨다.
-
-        GameObject[] enemyCreators = GameObject.FindGameObjectsWithTag("EnemyCreator");   //4-1. "EnemyCreator" tag가 달린 모든 gameobject 모두 검색
-        for (int i = 0; i < enemyCreators.Length; i++)
-        {
-            EnemyCreator ecs = enemyCreators[i].GetComponent<EnemyCreator>(); //4-2. 검색한 Creator 들이 가진 EnemyCreator.cs 컴포넌트에 접근
-            ecs.DecreaseCreateTime(); // 4-3. 각 EnemyCreator.cs 컴포넌트의 생성시간 감소 함수를 호출
-        }
-
-        /*
         GameObject enemyCreator = GameObject.Find("Enemy Creator");
         EnemyCreator ec = enemyCreator.GetComponent<EnemyCreator>();
         ec.DecreaseCreateTime();
@@ -59,9 +44,56 @@ public class LevelManager : MonoBehaviour
         GameObject enemyCreator3 = GameObject.Find("Enemy Creator (3)");
         EnemyCreator ec3 = enemyCreator3.GetComponent<EnemyCreator>();
         ec3.DecreaseCreateTime();
-        */
+    }
+    */
+    
+   
+
+    //A. 레벨 Up & 다음 Level Score 갱신
+    void LevelUp() //level이 증가한 만큼 levelupscore도 증가
+    {
+        level++;
+        levelText.text = "Lv." + level;
+        levelUpScore = originUpScore * level;
+        
+
+    }
+    //B. EnemyCreator 생성속도 감소
+    void IncreaseCreateEnemy() //4. enemycreator의 생성속도를 level에 따라 감소시킨다.
+    {
+                GameObject[] enemyCreators = GameObject.FindGameObjectsWithTag("EnemyCreator");   //4-1. "EnemyCreator" tag가 달린 모든 gameobject 모두 검색
+        for (int i = 0; i < enemyCreators.Length; i++)
+        {
+            EnemyCreator ecs = enemyCreators[i].GetComponent<EnemyCreator>(); //4-2. 검색한 Creator 들이 가진 EnemyCreator.cs 컴포넌트에 접근
+            ecs.DecreaseCreateTime(); // 4-3. 각 EnemyCreator.cs 컴포넌트의 생성시간 감소 함수를 호출
+        }
+    }
+    //C. Enemy 이동속도 증가
+    void IncreaseEnemySpeed() //5. 레벨업 시, 이미 만들어져있는 enemy와 신규 enemy의 속도가 다름 -> 신규 enemy의 속도도 올려주기
+    {
+        //-1. 이미 만들어져 Hierarchy에 있는 enemy들을 tag로 모두 검색
+        GameObject[] enemys = GameObject.FindGameObjectsWithTag("Enemy");
+
+        for (int i = 0; i < enemys.Length; i++)
+        {
+            //-2. 해당 enemy들이 가지고 있는 enemy 컴포넌트 각각 접근
+            Enemy enemy = enemys[i].GetComponent<Enemy>();
+            //-3. enemy 컴포넌트가 가지고 있는 speedUp() 함수 각각 호출
+            enemy.SpeedUp();
+        }
+    }
+
+    public void UpdateLevel()
+    {
+        LevelUp(); //레벨증가
+        IncreaseCreateEnemy(); //Enemy 생성속도 증가
+        IncreaseEnemySpeed(); //Enemy 이동속도 증가
 
     }
 
-    
 }
+
+   
+
+
+

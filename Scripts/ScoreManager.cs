@@ -61,7 +61,7 @@ public class ScoreManager : MonoBehaviour
         
         if (currentScore > lv.levelUpScore )
         {
-            lv.Levelup();
+            lv.UpdateLevel();
             
             // level 1을 증가시킨다.
             // 증가시킨 level을 화면에 표시
