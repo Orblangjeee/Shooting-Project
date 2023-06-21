@@ -11,12 +11,23 @@ using Unity.VisualScripting.Antlr3.Runtime.Tree;
 //enemycreator의 생성속도를 level에 따라 일정 비율로 변화
 //enemy 이동속도를 level에 따라 일정 비율로 변화
 
+//singleton 으로 만들어 관리
+
 public class LevelManager : MonoBehaviour
 {
+    //singleton 용 인스턴스 1개 필요
+    public static LevelManager Instance = null;
+
     public int level = 1;
     public int levelUpScore = 10;
     public TextMeshProUGUI levelText;
     int originUpScore;
+
+    private void Awake()
+    { //만일 singleton용 인스턴스가 비어있다면 singleton 용 인스턴스에 나 자신을 넣어준다
+        if (Instance == null) { Instance = this; }
+    }
+
     // Start is called before the first frame update
     void Start()
     {

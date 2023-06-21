@@ -5,6 +5,9 @@ using TMPro;
 
 public class ScoreManager : MonoBehaviour
 {
+    public static ScoreManager Instance;
+
+
     //역할 : 점수를 관리
     //A : Enemy 잡을 때 마다 점수 획득, 화면에 표시
     // 화면 표시 text, 점수
@@ -18,6 +21,11 @@ public class ScoreManager : MonoBehaviour
     //Save, Load
     public TextMeshProUGUI bestScoreText;
      int bestScore = 10;
+    private void Awake()
+    {
+        if (Instance == null) { Instance = this; }
+    }
+
     void Start()
     {
         // 2. 증가 시킨 점수를 화면에 표시
@@ -52,16 +60,16 @@ public class ScoreManager : MonoBehaviour
         }
 
         //3. levelmanager 컴포넌트가 붙어있는 levelmanager 게임오브젝트를 알아낸다
-        GameObject levelObj = GameObject.Find("Level Manager");
+        //GameObject levelObj = GameObject.Find("Level Manager");
         //2. levelupsocre 변수를 가지고 있는 levelmanager 컴포넌트를 알아낸다
-        LevelManager lv = levelObj.GetComponent<LevelManager>();
+        //LevelManager lv = levelObj.GetComponent<LevelManager>();
         //1. levelupscore가 몇 점인지 알고 싶다
         //현재 점수가 levelUpScore을 넘은 경우
 
         
-        if (currentScore > lv.levelUpScore )
+        if (currentScore > LevelManager.Instance.levelUpScore )
         {
-            lv.UpdateLevel();
+            LevelManager.Instance.UpdateLevel();
             
             // level 1을 증가시킨다.
             // 증가시킨 level을 화면에 표시

@@ -1,10 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.PackageManager.Requests;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 
 //역할 : Enemy는 아래 방향으로 일정한 속도로 이동한다.
 // 방향 (아래 vector.down)
@@ -12,6 +8,7 @@ using UnityEngine.SocialPlatforms.Impl;
 // p = p0 +vt 
 
 //역할 : Enemy와 Player가 충돌시 둘 다 Destroy
+// player랑 부딪혔을 때 특수효과
 
 //역할 : Enemy가 처음 생성될 때, 이동방식을 랜덤하게 지정
 // 1. 아래로 이동 2. 타깃 이동 3. 랜덤 확률 50%
@@ -35,6 +32,10 @@ public class Enemy : MonoBehaviour
     public int enemyHp = 3;
     public int minusHp = -1;
 
+    //특수효과
+    public GameObject missileEffectFactory; //미사일이랑 enemy가 부딪힐 때
+    public GameObject playerEffectFactory; // 플레이어가 enemy랑 부딪힐 때
+
     // Start is called before the first frame update
     void Start()
     {
@@ -57,12 +58,18 @@ public class Enemy : MonoBehaviour
             if (randomNumber >= 50)
             {
                 direction = Vector3.down;
+                
                 moveState = 0;
             }
             if (randomNumber < 50)
             {
                 direction = player.transform.position - transform.position;
                 direction.Normalize();
+            //타겟 방향으로 Enemy 회전
+            // Enemy의 기준 방향인 Y축 방향을 타깃방향과 같게 한다.
+
+            transform.up  = -1 * direction;
+
                 moveState = 1;
             }
         
@@ -99,30 +106,34 @@ public class Enemy : MonoBehaviour
 
             // A: 이동이 down 이면 +1
             // B: 이동이 Player 이면 +3
-
+           
             Destroy(collision.gameObject);
             enemyHp -= 1;
-            Debug.Log("enemyHP:" + enemyHp);
+           
             if (enemyHp <= 0)
             {
-                Destroy(gameObject);
+                
                 
                 // 0-3. ScoreManager.cs 컴포넌트를 가지고 있는 GameObject를 찾는다.
-                GameObject smObj = GameObject.Find("Score Manager");
+                //GameObject smObj = GameObject.Find("Score Manager");
                 // 0-2. SetScore()를 가지고 있는 ScoreManager 컴포넌트를 찾는다.
-                ScoreManager sm = smObj.GetComponent<ScoreManager>();
+                //ScoreManager sm = smObj.GetComponent<ScoreManager>();
                 if (moveState == 0)
                 {
                     // 0-1. SetScore 실행 // 0. 현재 점수 +1 증가
-                    sm.SetScore(1);
+                    ScoreManager.Instance.SetScore(1);
                 }
                 if (moveState == 1)
                 {
-                    sm.SetScore(3);
+                    ScoreManager.Instance.SetScore(3);
                 }
-               
-                
-                
+
+                //미사일이랑 부딪힌 특수효과 실행
+                // 1. 미사일 특수효과를 만든다
+                GameObject missilefx = Instantiate(missileEffectFactory);
+                missilefx.transform.position = transform.position;
+                //2. 미사일 특수효과 위치를 옮긴다. -> Enemy 위치 = 나자신의 위치
+                Destroy(gameObject);
             }
         }
         if (collision.gameObject.name.Equals("Player"))
@@ -131,7 +142,10 @@ public class Enemy : MonoBehaviour
             PlayerHealth playhp = player.GetComponent<PlayerHealth>();
             playhp.SetHP(minusHp);
 
-            //
+            GameObject effect = Instantiate(playerEffectFactory);
+            effect.transform.position = transform.position;
+
+            
             Destroy(gameObject);   
         }
     }
@@ -139,7 +153,7 @@ public class Enemy : MonoBehaviour
     //Enemy 이동속도 증가
     public void SpeedUp()
     {
-       
+        
         GameObject lmObj = GameObject.Find("Level Manager");
         LevelManager lm = lmObj.GetComponent<LevelManager>();
         //현재 level이 뭐지? 가져와야행
@@ -148,8 +162,10 @@ public class Enemy : MonoBehaviour
         // 현재 level:1 초과인 경우에만 스피드를 올린다.
         if (lm.level > 1)
         {
+            
             //Level이 증가한 만큼 speed를 올린다.
-            speed = speed + lm.level;
+            speed += lm.level;
+            
         }
         
     }

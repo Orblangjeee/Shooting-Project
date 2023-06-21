@@ -8,9 +8,13 @@ using UnityEngine;
 //player hp, 표시할 text
 //enemy와 부딪히면 hp -1
 // hp가 0이 되면 player 파괴
-
+// player 파괴 시, 특수효과 재생(만듦, 위치)
+// 특수효과 이펙트 공장
 public class PlayerHealth : MonoBehaviour
 {
+    public GameObject destroyEffectFactory; //특수효과 이펙트 공장
+
+
     public int hp = 5;
     public TextMeshProUGUI hpText;
     // Start is called before the first frame update
@@ -36,11 +40,14 @@ public class PlayerHealth : MonoBehaviour
 
         if (hp < 1)
         {
-            
+            GameManager.Instance.Restart();
+
+            GameObject effect = Instantiate(destroyEffectFactory);
+            effect.transform.position = transform.position;
+
             //Restart
-            GameObject gmObj = GameObject.Find("GM");
-            GameManager gm = gmObj.GetComponent<GameManager>();
-            gm.Restart();
+
+           
 
             Destroy(gameObject); //destroy는 마지막에
         }
